@@ -1,0 +1,41 @@
+﻿<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <a class="nav-link" asp-controller="Book" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
+                    Quản lý sách
+                </a>
+                <a class="nav-link" asp-controller="Loan" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book-reader"></i></div>
+                    Quản lý mượn trả
+                </a>
+                <a class="nav-link" asp-controller="Readers" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Quản lý độc giả
+                </a>
+                <a class="nav-link" asp-controller="Report" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                    Báo cáo thống kê
+                </a>
+                <a class="nav-link" href="#" onclick="return confirmBeforeExit();">
+                    <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
+                    Thoát
+                </a>
+            </div>
+        </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Đăng nhập với: Tài khoản Quản lý</div>
+        </div>
+    </nav>
+</div>
+
+<script>
+    function confirmBeforeExit() {
+        if (confirm("Bạn có muốn thoát không?")) {
+            // SỬA Ở ĐÂY: Phải gọi action "Logout" để xóa cookie
+            window.location.href = '@Url.Action("Logout", "Login")';
+        }
+        return false;
+    }
+</script>

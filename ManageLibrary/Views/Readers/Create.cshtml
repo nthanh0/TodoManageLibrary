@@ -1,0 +1,125 @@
+﻿@model ManageLibrary.Models.Reader
+
+@{
+    ViewData["Title"] = "Thêm Độc Giả Mới";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+<!-- Thêm CSS của thư viện intl-tel-input -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">@ViewData["Title"]</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Thêm ID "create-reader-form" cho form -->
+                    <form asp-action="Create" id="create-reader-form">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FullName" class="form-label"></label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DateOfBirth" class="form-label"></label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NationalId" class="form-label"></label>
+                                <input asp-for="NationalId" class="form-control" />
+                                <span asp-validation-for="NationalId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TypeOfReader" class="form-label"></label>
+                                <select asp-for="TypeOfReader" class="form-select">
+                                    <option value="">-- Chọn loại độc giả --</option>
+                                    <option value="Sinh viên">Sinh viên</option>
+                                    <option value="Giảng viên">Giảng viên</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <span asp-validation-for="TypeOfReader" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" type="email" class="form-control" title="Vui lòng nhập email hợp lệ (ví dụ: user@example.com)" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <!-- CẬP NHẬT TRƯỜNG TELEPHONE -->
+                                <label asp-for="Telephone" class="form-label"></label>
+                                <!-- Xóa pattern và type="tel", thêm ID "phone" -->
+                                <input asp-for="Telephone" class="form-control" id="phone" />
+                                <span asp-validation-for="Telephone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Department" class="form-label"></label>
+                            <input asp-for="Department" class="form-control" />
+                            <span asp-validation-for="Department" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <div class="text-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Tạo mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- Thêm JS của thư viện intl-tel-input -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+        // Khởi tạo thư viện trên ô input có ID "phone"
+        const phoneInput = document.querySelector("#phone");
+        const iti = window.intlTelInput(phoneInput, {
+            initialCountry: "vn", // Ưu tiên Việt Nam
+            separateDialCode: true, // Hiển thị mã vùng (+84) riêng
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js" // Cần thiết để lấy SĐT chuẩn
+        });
+
+        // QUAN TRỌNG: Cập nhật giá trị input trước khi submit form
+        const form = document.querySelector("#create-reader-form");
+        form.addEventListener("submit", function() {
+            // Lấy SĐT theo định dạng quốc tế (E.164)
+            const internationalNumber = iti.getNumber();
+            // Gán giá trị đó vào ô input để gửi về server
+            phoneInput.value = internationalNumber;
+        });
+    </script>
+}
+

@@ -1,0 +1,115 @@
+﻿@model ManageLibrary.Models.LoanSlip
+@{
+    ViewData["Title"] = "Tạo phiếu mượn";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+<!-- 1. Thêm CSS cho Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- CSS để Select2 tương thích với Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+
+<div class="container mt-4">
+    <h3 class="mb-4">Tạo phiếu mượn mới</h3>
+    <form asp-action="Create" method="post" class="mx-auto" style="max-width: 700px;">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6 mb-3">
+                <label asp-for="ReaderId" class="form-label">Tìm Độc giả (theo Tên hoặc ID)</label>
+                <!-- 2. Thêm ID "readerSearchSelect" để JavaScript có thể tìm thấy -->
+                <select asp-for="ReaderId" asp-items="ViewBag.Readers" class="form-select" id="readerSearchSelect">
+                    <option value="">-- Gõ để tìm độc giả --</option>
+                </select>
+                <span asp-validation-for="ReaderId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6 mb-3">
+                <label asp-for="LoanDate" class="form-label">Ngày mượn</label>
+                <input asp-for="LoanDate" class="form-control" type="date" />
+                <span asp-validation-for="LoanDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ExpiredDate" class="form-label">Ngày hết hạn</label>
+                <input asp-for="ExpiredDate" class="form-control" type="date" />
+                <span asp-validation-for="ExpiredDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Chọn sách</label>
+            <!-- 3. (Khuyến nghị) Thêm ID cho cả ô chọn sách -->
+            <select name="selectedBooks" asp-items="ViewBag.Books" class="form-select" id="bookSearchSelect" multiple size="8">
+            </select>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-4 me-2">Tạo phiếu</button>
+            <a asp-action="Index" class="btn btn-secondary px-4">Hủy</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <!-- 4. Thêm JS cho Select2 (Giả định jQuery đã được tải trong Layout) -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            // 5. ĐỊNH NGHĨA HÀM MATCHER TÙY CHỈNH
+            // Hàm này cho phép Select2 tìm kiếm cả trong 'text' (Tên) và 'value' (ID)
+            function customMatcher(params, data) {
+                // Nếu không có gì để tìm, trả về null
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+
+                // Bỏ qua các option không có text (như placeholder)
+                if (typeof data.text === 'undefined') {
+                    return null;
+                }
+
+                // Chuyển đổi từ tìm kiếm và text/value sang chữ thường
+                var term = params.term.toLowerCase();
+                var text = data.text.toLowerCase();
+                var value = data.id.toLowerCase(); // 'data.id' chính là 'value' của option
+
+                // 1. Kiểm tra xem 'text' (FullName) có chứa từ tìm kiếm KHÔNG
+                if (text.indexOf(term) > -1) {
+                    return data;
+                }
+
+                // 2. Kiểm tra xem 'value' (ReaderId) có chứa từ tìm kiếm KHÔNG
+                if (value.indexOf(term) > -1) {
+                    return data;
+                }
+
+                // Nếu không khớp, trả về null
+                return null;
+            }
+
+            // 6. Kích hoạt Select2 cho ô tìm độc giả VÀ SỬ DỤNG MATCHER
+            $('#readerSearchSelect').select2({
+                placeholder: "-- Gõ để tìm độc giả --",
+                allowClear: true,
+                theme: "bootstrap-5", // Sử dụng theme bootstrap 5
+                matcher: customMatcher // <-- THÊM DÒNG NÀY
+            });
+
+            // 7. Kích hoạt Select2 cho ô chọn sách (giữ nguyên)
+            $('#bookSearchSelect').select2({
+                placeholder: "-- Chọn sách --",
+                theme: "bootstrap-5"
+            });
+        });
+    </script>
+}

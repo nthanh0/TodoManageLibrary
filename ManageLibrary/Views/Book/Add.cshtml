@@ -1,0 +1,100 @@
+﻿@model ManageLibrary.Models.Book
+
+@{
+    ViewData["Title"] = "Thêm sách mới";
+    Layout = "~/Views/Shared/Layout.cshtml"; // Thêm Layout
+}
+
+<div class="container-fluid px-4">
+    <h3 class="text-center my-4">Thêm sách mới</h3>
+
+    <form asp-action="Add" asp-controller="Book" method="post" class="mx-auto" style="max-width:600px;">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="BookId" class="form-label">Mã sách</label>
+            <input asp-for="BookId" class="form-control" readonly />
+            <span asp-validation-for="BookId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Tên sách</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="AuthorId" class="form-label">Tác giả</label>
+            <select asp-for="AuthorId" asp-items="ViewBag.Authors" class="form-select">
+                <option value="">-- Chọn tác giả --</option>
+            </select>
+            <span asp-validation-for="AuthorId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PublisherId" class="form-label">Nhà xuất bản</label>
+            <select asp-for="PublisherId" asp-items="ViewBag.Publishers" class="form-select">
+                <option value="">-- Chọn nhà xuất bản --</option>
+            </select>
+            <span asp-validation-for="PublisherId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryId" class="form-label">Thể loại</label>
+            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+                <option value="">-- Chọn thể loại --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6 mb-3">
+                <label asp-for="YearOfPublic" class="form-label">Năm xuất bản</label>
+                <input asp-for="YearOfPublic" class="form-control" type="number" />
+                <span asp-validation-for="YearOfPublic" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Position" class="form-label">Vị trí</label>
+                <input asp-for="Position" class="form-control" />
+                <span asp-validation-for="Position" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4 mb-3">
+                <label asp-for="Cost" class="form-label">Giá (VNĐ)</label>
+                <input asp-for="Cost" class="form-control" type="number" />
+                <span asp-validation-for="Cost" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label asp-for="NumOfPage" class="form-label">Số trang</label>
+                <input asp-for="NumOfPage" class="form-control" type="number" />
+                <span asp-validation-for="NumOfPage" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label asp-for="Quantity" class="form-label">Số lượng</label>
+                <input asp-for="Quantity" class="form-control" type="number" value="1" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+        </div>
+
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-success px-4">Thêm mới</button>
+            <a asp-action="Index" class="btn btn-secondary px-4">Hủy</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

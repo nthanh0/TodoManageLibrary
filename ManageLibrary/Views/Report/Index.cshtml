@@ -1,0 +1,124 @@
+﻿@model ManageLibrary.Models.ReportViewModel
+@{
+    ViewData["Title"] = "Báo cáo Thống kê";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Báo cáo Thống kê</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Tổng quan thư viện</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <i class="fas fa-book fa-3x"></i>
+                        <div class="text-end">
+                            <div class="fs-1 fw-bold">@Model.TotalBooks</div>
+                            <div>Tổng số Sách</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <i class="fas fa-users fa-3x"></i>
+                        <div class="text-end">
+                            <div class="fs-1 fw-bold">@Model.TotalReaders</div>
+                            <div>Tổng số Độc giả</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-dark mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <i class="fas fa-book-reader fa-3x"></i>
+                        <div class="text-end">
+                            <div class="fs-1 fw-bold">@Model.CurrentLoans</div>
+                            <div>Đang mượn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                        <div class="text-end">
+                            <div class="fs-1 fw-bold">@Model.OverdueLoans</div>
+                            <div>Phiếu quá hạn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Top 10 Sách được mượn nhiều nhất
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tên Sách</th>
+                                <th class="text-center">Số lượt mượn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model.TopLoanedBooks)
+                            {
+                                <tr>
+                                    <td>@book.BookName</td>
+                                    <td class="text-center">@book.LoanCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Thống kê Sách theo Thể loại
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Thể loại</th>
+                                <th class="text-center">Số lượng sách</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model.BooksByCategory)
+                            {
+                                <tr>
+                                    <td>@category.CategoryName</td>
+                                    <td class="text-center">@category.BookCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

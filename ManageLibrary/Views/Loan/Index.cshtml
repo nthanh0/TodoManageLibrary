@@ -1,0 +1,149 @@
+﻿@model IEnumerable<ManageLibrary.Models.LoanSlip>
+@{
+    ViewData["Title"] = "Quản lý mượn - trả";
+    Layout = "~/Views/Shared/Layout.cshtml";
+    var currentFilter = (string?)ViewData["CurrentFilter"] ?? string.Empty;
+    var currentStatus = (string?)ViewData["CurrentStatus"] ?? string.Empty;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+
+    <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+        <div class="col-sm-5 col-md-6">
+            <label for="search" class="form-label">Tìm phiếu (Mã phiếu / Độc giả / Mã độc giả)</label>
+            <input type="text" class="form-control" id="search" name="search" value="@currentFilter" placeholder="VD: PM001, Nguyễn Văn A, DG123..." />
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <label for="status" class="form-label">Trạng thái</label>
+            <select id="status" name="status" class="form-select">
+                @if (string.IsNullOrEmpty(currentStatus))
+                {
+                    <option value="" selected>-- Tất cả --</option>
+                }
+                else
+                {
+                    <option value="">-- Tất cả --</option>
+                }
+
+                @if (currentStatus == "Đang mượn")
+                {
+                    <option value="Đang mượn" selected>Đang mượn</option>
+                }
+                else
+                {
+                    <option value="Đang mượn">Đang mượn</option>
+                }
+
+                @if (currentStatus == "Đã trả")
+                {
+                    <option value="Đã trả" selected>Đã trả</option>
+                }
+                else
+                {
+                    <option value="Đã trả">Đã trả</option>
+                }
+
+                @if (currentStatus == "Quá hạn")
+                {
+                    <option value="Quá hạn" selected>Quá hạn</option>
+                }
+                else
+                {
+                    <option value="Quá hạn">Quá hạn</option>
+                }
+            </select>
+        </div>
+        <div class="col-sm-3 col-md-3 text-end">
+            <button type="submit" class="btn btn-primary me-2">Lọc</button>
+            <a asp-action="Index" class="btn btn-secondary">Đặt lại</a>
+            <a asp-action="Create" class="btn btn-success ms-2">Tạo phiếu</a>
+        </div>
+    </form>
+
+    <div class="table-responsive" style="max-height:60vh; overflow-y:auto;">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                    <th>Mã phiếu</th>
+                    <th>Độc giả</th>
+                    <th>Ngày mượn</th>
+                    <th>Hạn trả</th>
+                    <th>Ngày trả</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center" style="width: 160px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in Model)
+                {
+                    <tr>
+                        <td>@loan.LoanId</td>
+                        <td>
+                            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Mã độc giả: @loan.ReaderId">
+                                @(loan.Reader?.FullName ?? "-")
+                            </span>
+                        </td>
+                        <td>@loan.LoanDate.ToString("dd/MM/yyyy")</td>
+                        <td>@(loan.ExpiredDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                        <td>@(loan.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                        <td>
+                            <span class="badge @(loan.Status == "Đang mượn" ? "bg-warning" : loan.Status == "Đã trả" ? "bg-success" : loan.Status == "Quá hạn" ? "bg-danger" : "bg-secondary")">
+                                @loan.Status
+                            </span>
+                        </td>
+                        <td class="text-center text-nowrap">
+                            @if (loan.Status != "Đã trả")
+                            {
+                                <a asp-action="Return" asp-route-id="@loan.LoanId" class="btn btn-primary btn-sm me-2">Trả sách</a>
+                            }
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#detailsModal-@loan.LoanId">
+                                Chi tiết
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @foreach (var loan in Model)
+    {
+        <div class="modal fade" id="detailsModal-@loan.LoanId" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chi tiết phiếu mượn #@loan.LoanId</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sách</th>
+                                    <th>Tình trạng mượn</th>
+                                    <th>Tình trạng trả</th>
+                                    <th>Mất sách</th>
+                                    <th>Tiền phạt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in loan.LoanDetails)
+                                {
+                                    <tr>
+                                        <td>@(detail.Book?.Name ?? "-")</td>
+                                        <td>@detail.LoanStatus</td>
+                                        <td>@(detail.ReturnStatus ?? "-")</td>
+                                        <td>@(detail.IsLose == true ? "Có" : "Không")</td>
+                                        <td>@(detail.Fine?.ToString("N0") ?? "0") đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

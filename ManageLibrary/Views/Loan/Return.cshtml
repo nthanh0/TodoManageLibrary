@@ -1,0 +1,92 @@
+﻿@model ManageLibrary.Models.LoanSlip
+@{
+    ViewData["Title"] = "Trả sách";
+    Layout = "~/Views/Shared/Layout.cshtml";
+    // SỬA: Chuyển ICollection thành List để dùng vòng lặp for
+    var detailsList = Model.LoanDetails.ToList();
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Trả sách - Phiếu #@Model.LoanId</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Độc giả:</strong> @Model.Reader?.FullName</p>
+                    <p><strong>Ngày mượn:</strong> @Model.LoanDate.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Hạn trả:</strong> @(Model.ExpiredDate?.ToString("dd/MM/yyyy") ?? "-")</p>
+                    <p><strong>Tình trạng:</strong> @Model.Status</p>
+                </div>
+            </div>
+
+            <form asp-action="Return" asp-route-id="@Model.LoanId" method="post">
+                @Html.AntiForgeryToken()
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sách</th>
+                            <th>Tình trạng mượn</th>
+                            <th>Tình trạng trả</th>
+                            <th>Mất sách</th>
+                            <th>Tiền phạt (VNĐ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < detailsList.Count; i++)
+                        {
+                            <tr>
+                                <input type="hidden" name="loanDetails[@i].LoanDetailId" value="@detailsList[i].LoanDetailId" />
+                                <input type="hidden" name="loanDetails[@i].LoanId" value="@detailsList[i].LoanId" />
+                                <input type="hidden" name="loanDetails[@i].BookId" value="@detailsList[i].BookId" />
+
+                                <td>@(detailsList[i].Book?.Name ?? "-")</td>
+                                <td>@detailsList[i].LoanStatus</td>
+                                <td>
+                                    <select name="loanDetails[@i].ReturnStatus" class="form-select form-select-sm">
+                                        <option value="Tốt">Tốt</option>
+                                        <option value="Hư hỏng nhẹ">Hư hỏng nhẹ</option>
+                                        <option value="Hư hỏng nặng">Hư hỏng nặng</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="hidden" name="loanDetails[@i].IsLose" value="false" />
+                                        <input type="checkbox" name="loanDetails[@i].IsLose" value="true" class="form-check-input"
+                                               onchange="updateFine(this, @i)" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" name="loanDetails[@i].Fine" value="0" class="form-control form-control-sm"
+                                           id="fine-@i" min="0" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary px-4 me-2">Xác nhận trả</button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateFine(checkbox, index) {
+            const fineInput = document.getElementById(`fine-${index}`);
+            if (checkbox.checked) {
+                // SỬA: Gán giá trị phạt khi mất sách (ví dụ)
+                fineInput.value = "100000";
+            } else {
+                fineInput.value = "0";
+            }
+        }
+    </script>
+}

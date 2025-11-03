@@ -1,0 +1,35 @@
+﻿@model ManageLibrary.Models.Account
+@{
+    ViewData["Title"] = "Trang đăng nhập";
+    Layout = null;
+}
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/css/login.css" rel="stylesheet" />
+</head>
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+
+    <div class="card login-card shadow-sm" style="width: 22rem;">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-4">Đăng nhập</h3>
+
+            <form asp-action="Index" asp-controller="Login" method="post">
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label">Email</label>
+                    <input asp-for="Username" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Mật khẩu</label>
+                    <input asp-for="Password" type="password" class="form-control" />
+                </div>
+
+                <div class="text-danger mb-3">@ViewBag.ErrorMessage</div>
+
+                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
