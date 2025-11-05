@@ -27,11 +27,16 @@
         </div>
 
         <div class="mb-3">
-            <label asp-for="AuthorId" class="form-label">Tác giả</label>
+            <label asp-for="AuthorId" class="form-label">Tên tác giả</label>
             <select asp-for="AuthorId" asp-items="ViewBag.Authors" class="form-select">
-                <option value="">-- Chọn tác giả --</option>
+                <option value="">-- Chọn tác giả có sẵn --</option>
             </select>
             <span asp-validation-for="AuthorId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="NewAuthorName" class="form-label">...Hoặc thêm tác giả mới (nếu không có trong danh sách)</label>
+            <input type="text" name="NewAuthorName" class="form-control" value="@ViewData["NewAuthorName"]" />
         </div>
 
         <div class="mb-3">

@@ -77,7 +77,40 @@ namespace QLThuVien.Controllers
             // "D3" đảm bảo số luôn có 3 chữ số, VD: 1 -> "001", 21 -> "021", 123 -> "123"
             return $"{prefix}{nextNumber:D3}";
         }
+        // Đặt hàm này bên cạnh hàm GenerateNewBookIdAsync
 
+        /// <summary>
+        /// Tự động tạo mã Tác Giả mới (VD: TG001 -> TG002)
+        /// </summary>
+        private async Task<string> GenerateNewAuthorIdAsync()
+        {
+            const string prefix = "TG"; // "TG" = Tác Giả
+            const int paddingLength = 3; // Định dạng TG001
+
+            // 1. Tìm tác giả có AuthorId lớn nhất
+            var lastAuthor = await _context.Authors
+                .Where(a => a.AuthorId.StartsWith(prefix))
+                .OrderByDescending(a => a.AuthorId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (lastAuthor != null)
+            {
+                // 2. Lấy phần số từ ID
+                string numberPart = lastAuthor.AuthorId.Substring(prefix.Length);
+
+                // 3. Chuyển sang số và + 1
+                if (int.TryParse(numberPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            // 4. Định dạng lại mã mới
+            return $"{prefix}{nextNumber:D3}";
+        }
 
         // ==============================================
         // INDEX (GET)
@@ -138,32 +171,93 @@ namespace QLThuVien.Controllers
         // ==============================================
         // POST: /Admin/Book/Add
         [HttpPost("Add")]
-        [ValidateAntiForgeryToken] // Chống tấn công CSRF
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(
             // Cập nhật [Bind] để bao gồm "Quantity"
-            [Bind("BookId,Name,YearOfPublic,Position,NumOfPage,Cost,Quantity,CategoryId,AuthorId,PublisherId")] Book book)
+            [Bind("BookId,Name,YearOfPublic,Position,NumOfPage,Cost,Quantity,CategoryId,AuthorId,PublisherId")] Book book,
+            string NewAuthorName) // *** THAY ĐỔI: Thêm tham số "NewAuthorName"
         {
+            // *** THAY ĐỔI: Xử lý logic tác giả MỚI trước khi validate
+            if (!string.IsNullOrEmpty(NewAuthorName))
+            {
+                // Người dùng đã nhập tên tác giả mới -> Ưu tiên dùng tên này
+                // 1. Kiểm tra xem tên tác giả này đã tồn tại trong DB chưa
+                var trimmedName = NewAuthorName.Trim();
+                var existingAuthor = await _context.Authors
+                    .FirstOrDefaultAsync(a => a.Name.ToLower() == trimmedName.ToLower());
+
+                if (existingAuthor != null)
+                {
+                    // 2a. Nếu đã tồn tại, gán AuthorId của sách bằng ID của tác giả đó
+                    book.AuthorId = existingAuthor.AuthorId;
+                }
+                else
+                {
+                    // 2b. Nếu CHƯA tồn tại, tạo tác giả mới
+                    var newAuthor = new Author
+                    {
+                        AuthorId = await GenerateNewAuthorIdAsync(), // Dùng hàm mới tạo
+                        Name = trimmedName
+                        // Nếu Model Author có các trường [Required] khác, bạn cần thêm vào đây
+                    };
+
+                    _context.Authors.Add(newAuthor); // Thêm tác giả mới vào context
+
+                    // Gán AuthorId của sách bằng ID TÁC GIẢ MỚI
+                    book.AuthorId = newAuthor.AuthorId;
+                }
+
+                // 3. Vì ta đã gán `book.AuthorId` bằng tay,
+                // ta cần xóa lỗi validation của trường AuthorId (nếu có)
+                // (Trường hợp user không chọn gì từ dropdown, nó sẽ báo lỗi [Required])
+                if (ModelState.ContainsKey(nameof(Book.AuthorId)))
+                {
+                    ModelState.Remove(nameof(Book.AuthorId));
+                }
+            }
+            else if (string.IsNullOrEmpty(book.AuthorId))
+            {
+                // *** THAY ĐỔI: Báo lỗi nếu user không chọn dropdown VÀ cũng không nhập mới
+                ModelState.AddModelError("AuthorId", "Bạn phải chọn một tác giả hoặc nhập tên tác giả mới.");
+            }
+
+            // -----------------------------------------------------------------
+            // Code bên dưới gần như giữ nguyên
+
             if (ModelState.IsValid)
             {
-                // *** THAY ĐỔI: Thêm Try-Catch để bắt lỗi trùng khóa chính (PK)
                 try
                 {
-                    _context.Add(book);
+                    _context.Add(book); // Thêm SÁCH vào context
+
+                    // *** QUAN TRỌNG ***
+                    // Dòng này sẽ lưu CẢ SÁCH MỚI và TÁC GIẢ MỚI (nếu có) vào CSDL
+                    // trong cùng 1 giao dịch (transaction).
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index)); // Dùng nameof() để an toàn hơn
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException ex)
                 {
-                    // Kiểm tra xem có phải lỗi trùng Primary Key (PK) không
-                    // Mã 2627 và 2601 là mã lỗi cho Unique Constraint / Primary Key violation
+                    // Giữ nguyên code bắt lỗi trùng khóa chính (PK)
                     if (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601))
                     {
-                        // Lỗi này xảy ra khi 2 người cùng lúc tạo mã
-                        ModelState.AddModelError("BookId", $"Mã sách '{book.BookId}' đã tồn tại (có thể do người khác vừa thêm). Vui lòng tải lại trang để lấy mã mới và thử lại.");
+                        // Kiểm tra xem lỗi là của Sách hay Tác giả
+                        if (ex.Message.Contains("Book"))
+                        {
+                            ModelState.AddModelError("BookId", $"Mã sách '{book.BookId}' đã tồn tại. Vui lòng tải lại trang để lấy mã mới.");
+                        }
+                        else if (ex.Message.Contains("Author"))
+                        {
+                            ModelState.AddModelError("AuthorId", $"Mã tác giả '{book.AuthorId}' đã tồn tại (lỗi trùng ID). Vui lòng thử lại.");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, "Lỗi trùng lặp khóa chính.");
+                        }
                     }
                     else
                     {
-                        // Lỗi DbUpdate khác
                         ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi lưu dữ liệu. Vui lòng thử lại.");
                     }
                 }
@@ -171,6 +265,10 @@ namespace QLThuVien.Controllers
 
             // Nếu ModelState không hợp lệ, tải lại dropdowns và hiển thị lại form
             await PopulateDropdowns(book.AuthorId, book.PublisherId, book.CategoryId);
+
+            // *** THAY ĐỔI: Gửi lại tên tác giả mới mà user đã gõ
+            ViewData["NewAuthorName"] = NewAuthorName;
+
             return View(book);
         }
 
