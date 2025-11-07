@@ -1,3 +1,14 @@
+--Comment Ctrl + K + C
+--Uncomment Ctrl + K + U
+--Drop database hiện có
+
+--USE [master];
+--GO
+--ALTER DATABASE [ManageLibrary] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--GO
+--DROP DATABASE [ManageLibrary];
+--GO
+
 CREATE DATABASE ManageLibrary;
 GO
 USE ManageLibrary;
@@ -161,7 +172,31 @@ VALUES
 ('DG009', N'Bùi Quốc Khánh', '2001-06-12', '384756920', N'Sinh viên', 'khanhbq@example.com', '0990123456', N'23 Tôn Đức Thắng, Cần Thơ', N'Luật học'),
 ('DG010', N'Nguyễn Thị Yến', '2000-01-20', '564738920', N'Sinh viên', 'yentn@example.com', '0902345678', N'101 Phạm Văn Đồng, Hà Nội', N'Thiết kế đồ họa');
 
+-- =========================
+-- PHIẾU MƯỢN/TRẢ MẪU
+-- =========================
+-- Các trạng thái sử dụng: 'Đang mượn', 'Đã trả', 'Quá hạn'
+INSERT INTO LoanSlip (LoanId, ReaderId, EmployeeId, LoanDate, ExpiredDate, ReturnDate, Status)
+VALUES
+('PM001', 'DG001', 'NV001', '2024-10-01', '2024-10-15', '2024-10-10', N'Đã trả'),
+('PM002', 'DG002', 'NV001', '2024-10-20', '2024-10-27', NULL,             N'Đang mượn'),
+('PM003', 'DG003', 'NV001', '2024-09-25', '2024-10-02', NULL,             N'Quá hạn'),
+('PM004', 'DG004', 'NV001', '2024-10-15', '2024-10-29', '2024-11-01',     N'Đã trả');
+
+-- CHI TIẾT PHIẾU MƯỢN/TRẢ
+INSERT INTO LoanDetail (LoanDetailId, LoanId, BookId, LoanStatus, ReturnStatus, IsLose, Fine)
+VALUES
+-- PM001: Đã trả, sách tốt
+('CT001', 'PM001', 'S001', N'Mới', N'Tốt', 0, 0),
+('CT002', 'PM001', 'S003', N'Mới', N'Tốt', 0, 0),
+-- PM002: Đang mượn (chưa trả)
+('CT003', 'PM002', 'S002', N'Mới', NULL, 0, 0),
+('CT004', 'PM002', 'S004', N'Mới', NULL, 0, 0),
+-- PM003: Quá hạn (chưa trả)
+('CT005', 'PM003', 'S005', N'Bình thường', NULL, 0, 0),
+-- PM004: Đã trả, 1 cuốn mất, có phạt
+('CT006', 'PM004', 'S002', N'Bình thường', N'Hư hỏng nặng', 1, 100000),
+('CT007', 'PM004', 'S001', N'Bình thường', N'Tốt', 0, 0);
 
 PRINT N'Cơ sở dữ liệu đã khởi tạo và thêm dữ liệu mẫu thành công!';
 GO
-
