@@ -1,4 +1,4 @@
-﻿@model ManageLibrary.Models.Reader
+@model ManageLibrary.Models.Reader
 
 @{
     ViewData["Title"] = "Chỉnh sửa thông tin độc giả";
@@ -20,11 +20,11 @@
                 </div>
                 <div class="card-body">
 
-                    <!-- LỖI 1: Sửa asp-action="Edit" và ID form -->
                     <form asp-action="Edit" id="edit-reader-form">
+                        @Html.AntiForgeryToken()
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <!-- LỖI 2: Phải thêm input hidden cho ReaderId -->
+                        <!-- Hidden ReaderId -->
                         <input type="hidden" asp-for="ReaderId" />
 
                         <div class="row">
@@ -35,7 +35,6 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="DateOfBirth" class="form-label"></label>
-                                <!-- LỖI 3: Cần gán value cho date input -->
                                 <input asp-for="DateOfBirth" type="date" class="form-control" value="@dobString" />
                                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
                             </div>
@@ -62,7 +61,8 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" type="email" class="form-control" title="Vui lòng nhập email hợp lệ (ví dụ: user@example.com)" />
+                                <input asp-for="Email" type="email" class="form-control"
+                                       title="Vui lòng nhập email hợp lệ (ví dụ: user@example.com)" />
                                 <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -85,16 +85,28 @@
                         </div>
 
                         <hr />
+                    </form>
 
+                    <!-- Hàng nút: Trái = Xóa, Phải = Quay lại + Lưu -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <form asp-action="Delete" asp-route-id="@Model.ReaderId" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa độc giả @Model.FullName (ID: @Model.ReaderId) không?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Xóa độc giả
+                                </button>
+                            </form>
+                        </div>
                         <div class="text-end">
                             <a asp-action="Index" class="btn btn-secondary me-2">
                                 <i class="fas fa-arrow-left"></i> Quay lại
                             </a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" form="edit-reader-form">
                                 <i class="fas fa-save"></i> Lưu thay đổi
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,18 +126,15 @@
 
         // Khởi tạo thư viện
         const iti = window.intlTelInput(phoneInput, {
-            initialCountry: "vn", // Tự động phát hiện
+            initialCountry: "vn",
             separateDialCode: true,
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
         });
 
         // Đặt SĐT ban đầu (quan trọng cho Edit)
-
         iti.promise.then(function() {
             iti.setNumber("@initialPhone");
         });
-
-
 
         const form = document.querySelector("#edit-reader-form");
         form.addEventListener("submit", function() {

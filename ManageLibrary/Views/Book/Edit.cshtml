@@ -1,4 +1,4 @@
-﻿@model ManageLibrary.Models.Book
+@model ManageLibrary.Models.Book
 
 @{
     ViewData["Title"] = "Chỉnh sửa sách";
@@ -8,7 +8,7 @@
 <div class="container-fluid px-4">
     <h3 class="text-center my-4">Chỉnh sửa sách (Mã: @Model.BookId)</h3>
 
-    <form asp-action="Edit" asp-controller="Book" method="post" class="mx-auto" style="max-width:600px;">
+    <form asp-action="Edit" asp-controller="Book" method="post" id="edit-book-form" class="mx-auto" style="max-width:600px;">
 
         @Html.AntiForgeryToken()
 
@@ -85,13 +85,26 @@
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
         </div>
-
-        <div class="text-center mt-3">
-            <!-- *** THAY ĐỔI: Nút bấm Sửa *** -->
-            <button type="submit" class="btn btn-warning px-4">Lưu thay đổi</button>
-            <a asp-action="Index" class="btn btn-secondary px-4">Hủy</a>
-        </div>
     </form>
+
+    <!-- Hàng nút hành động: trái = Xóa, phải = Hủy + Lưu -->
+    <div class="mx-auto" style="max-width:600px;">
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>
+                <form asp-action="Delete" asp-controller="Book" asp-route-id="@Model.BookId" method="post" class="d-inline"
+                      onsubmit="return confirm('Bạn có chắc muốn xóa sách @Model.Name (ID: @Model.BookId) không?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa sách
+                    </button>
+                </form>
+            </div>
+            <div class="text-end">
+                <a asp-action="Index" asp-controller="Book" class="btn btn-secondary me-2">Hủy</a>
+                <button type="submit" class="btn btn-warning" form="edit-book-form">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -99,4 +112,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-

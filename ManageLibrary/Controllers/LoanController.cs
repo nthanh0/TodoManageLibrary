@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ManageLibrary.Models; // Dùng namespace model từ CSDL
@@ -29,6 +29,32 @@ namespace QLThuVien.Controllers
             // Chúng ta đã lưu EmployeeId vào Claim khi đăng nhập
             // (Nếu không tìm thấy, trả về "NV001" làm dự phòng)
             return User.Claims.FirstOrDefault(c => c.Type == "EmployeeId")?.Value ?? "NV001";
+        }
+
+        // (Helper) Sinh mã phiếu mượn tiếp theo dạng PM###
+        private async Task<string> GenerateNextLoanIdAsync()
+        {
+            const string prefix = "PM";
+            int maxNumber = 0;
+
+            var ids = await _context.LoanSlips
+                .AsNoTracking()
+                .Select(l => l.LoanId)
+                .ToListAsync();
+
+            foreach (var id in ids)
+            {
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                // Lấy tất cả ký tự số trong chuỗi (hỗ trợ cả định dạng PM-..., PM001, ...)
+                var digits = new string(id.Where(char.IsDigit).ToArray());
+                if (int.TryParse(digits, out var number))
+                {
+                    if (number > maxNumber) maxNumber = number;
+                }
+            }
+
+            var next = maxNumber + 1;
+            return prefix + next.ToString("D3"); // PM001, PM002, ...
         }
 
         // 4. (Helper) Tải Dropdowns
@@ -158,6 +184,7 @@ namespace QLThuVien.Controllers
                     {
                         // 6. Gán thông tin phiếu mượn
                         loan.LoanId = "PM-" + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+                        loan.LoanId = await GenerateNextLoanIdAsync();
                         loan.Status = "Đang mượn";
 
                         // 7. Thêm chi tiết và GIẢM SỐ LƯỢNG sách
@@ -297,6 +324,58 @@ namespace QLThuVien.Controllers
                     return View(loanForView);
                 }
             }
+        }
+
+        // POST: /Admin/Loan/Delete/{id}
+        [HttpPost("Delete/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return NotFound();
+
+            // Chỉ cho xóa phiếu "Đã trả"
+            var loan = await _context.LoanSlips
+                .Include(l => l.LoanDetails)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+
+            if (loan == null)
+            {
+                TempData["ErrorMessage"] = "Phiếu mượn không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (loan.Status != "Đã trả")
+            {
+                TempData["ErrorMessage"] = "Chỉ được xóa phiếu mượn đã trả.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // Xóa chi tiết trước
+                    if (loan.LoanDetails != null && loan.LoanDetails.Any())
+                    {
+                        _context.LoanDetails.RemoveRange(loan.LoanDetails);
+                    }
+
+                    // Xóa phiếu mượn
+                    _context.LoanSlips.Remove(loan);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessMessage"] = "Đã xóa phiếu mượn thành công.";
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["ErrorMessage"] = "Xóa phiếu mượn thất bại: " + ex.Message;
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

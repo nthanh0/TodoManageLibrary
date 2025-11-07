@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ManageLibrary.Models; // Sử dụng Model
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -34,11 +34,10 @@ namespace QLThuVien.Controllers
             int currentLoans = await _context.LoanSlips
                 .CountAsync(l => l.Status == "Đang mượn");
 
-            // 4. Số phiếu quá hạn (Logic của bạn rất tốt)
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            // 4. Số phiếu quá hạn
+            // Sửa: chỉ tính các phiếu có Status = "Quá hạn" để đồng nhất với bộ lọc ở trang quản lý mượn trả.
             int overdueLoans = await _context.LoanSlips
-                .CountAsync(l => (l.Status == "Quá hạn")
-                                  || (l.Status == "Đang mượn" && l.ExpiredDate != null && l.ExpiredDate < today));
+                .CountAsync(l => l.Status == "Quá hạn");
 
             // 5. Top 10 sách mượn nhiều nhất (Dùng logic Join của bạn)
             var topLoanedBooks = await _context.LoanDetails

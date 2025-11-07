@@ -1,3 +1,14 @@
+--Comment Ctrl + K + C
+--Uncomment Ctrl + K + U
+--Drop database hiện có
+
+--USE [master];
+--GO
+--ALTER DATABASE [ManageLibrary] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--GO
+--DROP DATABASE [ManageLibrary];
+--GO
+
 CREATE DATABASE ManageLibrary;
 GO
 USE ManageLibrary;
@@ -161,76 +172,31 @@ VALUES
 ('DG009', N'Bùi Quốc Khánh', '2001-06-12', '384756920', N'Sinh viên', 'khanhbq@example.com', '0990123456', N'23 Tôn Đức Thắng, Cần Thơ', N'Luật học'),
 ('DG010', N'Nguyễn Thị Yến', '2000-01-20', '564738920', N'Sinh viên', 'yentn@example.com', '0902345678', N'101 Phạm Văn Đồng, Hà Nội', N'Thiết kế đồ họa');
 
+-- =========================
+-- PHIẾU MƯỢN/TRẢ MẪU
+-- =========================
+-- Các trạng thái sử dụng: 'Đang mượn', 'Đã trả', 'Quá hạn'
+INSERT INTO LoanSlip (LoanId, ReaderId, EmployeeId, LoanDate, ExpiredDate, ReturnDate, Status)
+VALUES
+('PM001', 'DG001', 'NV001', '2024-10-01', '2024-10-15', '2024-10-10', N'Đã trả'),
+('PM002', 'DG002', 'NV001', '2024-10-20', '2024-10-27', NULL,             N'Đang mượn'),
+('PM003', 'DG003', 'NV001', '2024-09-25', '2024-10-02', NULL,             N'Quá hạn'),
+('PM004', 'DG004', 'NV001', '2024-10-15', '2024-10-29', '2024-11-01',     N'Đã trả');
+
+-- CHI TIẾT PHIẾU MƯỢN/TRẢ
+INSERT INTO LoanDetail (LoanDetailId, LoanId, BookId, LoanStatus, ReturnStatus, IsLose, Fine)
+VALUES
+-- PM001: Đã trả, sách tốt
+('CT001', 'PM001', 'S001', N'Mới', N'Tốt', 0, 0),
+('CT002', 'PM001', 'S003', N'Mới', N'Tốt', 0, 0),
+-- PM002: Đang mượn (chưa trả)
+('CT003', 'PM002', 'S002', N'Mới', NULL, 0, 0),
+('CT004', 'PM002', 'S004', N'Mới', NULL, 0, 0),
+-- PM003: Quá hạn (chưa trả)
+('CT005', 'PM003', 'S005', N'Bình thường', NULL, 0, 0),
+-- PM004: Đã trả, 1 cuốn mất, có phạt
+('CT006', 'PM004', 'S002', N'Bình thường', N'Hư hỏng nặng', 1, 100000),
+('CT007', 'PM004', 'S001', N'Bình thường', N'Tốt', 0, 0);
 
 PRINT N'Cơ sở dữ liệu đã khởi tạo và thêm dữ liệu mẫu thành công!';
 GO
--- =========================
--- NHÂN VIÊN KHÁC
--- =========================
-INSERT INTO Employees (EmployeeId, FullName, Email, Telephone, Role)
-VALUES 
-('NV002', N'Trần Văn Bình', N'binhtv@lib.edu.vn', N'0911222333', N'Nhân viên mượn trả'),
-('NV003', N'Lê Thị Mai', N'mailt@lib.edu.vn', N'0933444555', N'Quản lý tài liệu'),
-('NV004', N'Phạm Quốc Toàn', N'toanpq@lib.edu.vn', N'0944555666', N'Quản lý độc giả'),
-('NV005', N'Vũ Thanh Tùng', N'tungvt@lib.edu.vn', N'0955666777', N'Thủ kho');
-
--- =========================
--- TÀI KHOẢN NHÂN VIÊN
--- =========================
-INSERT INTO Account (AccountId, Username, Password, EmployeeId)
-VALUES 
-('TK002', N'binhtv', N'123', 'NV002'),
-('TK003', N'mailt', N'123', 'NV003'),
-('TK004', N'toanpq', N'123', 'NV004'),
-('TK005', N'tungvt', N'123', 'NV005');
-
--- =========================
--- PHIẾU MƯỢN
--- =========================
-INSERT INTO LoanSlip (LoanId, ReaderId, EmployeeId, LoanDate, ExpiredDate, ReturnDate, Status)
-VALUES
-('PM001', 'DG001', 'NV002', '2025-10-20', '2025-11-05', '2025-11-03', N'Đã trả'),
-('PM002', 'DG002', 'NV002', '2025-10-25', '2025-11-10', NULL, N'Chưa trả'),
-('PM003', 'DG004', 'NV002', '2025-10-15', '2025-10-30', '2025-10-29', N'Đã trả'),
-('PM004', 'DG005', 'NV002', '2025-10-28', '2025-11-15', NULL, N'Chưa trả'),
-('PM005', 'DG003', 'NV002', '2025-09-30', '2025-10-15', '2025-10-12', N'Đã trả'),
-('PM006', 'DG006', 'NV002', '2025-10-02', '2025-10-22', '2025-10-20', N'Đã trả'),
-('PM007', 'DG007', 'NV002', '2025-10-21', '2025-11-07', NULL, N'Chưa trả'),
-('PM008', 'DG008', 'NV002', '2025-10-24', '2025-11-05', NULL, N'Chưa trả'),
-('PM009', 'DG009', 'NV002', '2025-10-23', '2025-11-06', '2025-11-05', N'Đã trả'),
-('PM010', 'DG010', 'NV002', '2025-10-29', '2025-11-12', NULL, N'Chưa trả');
-
--- =========================
--- CHI TIẾT MƯỢN
--- =========================
-INSERT INTO LoanDetail (LoanDetailId, LoanId, BookId, LoanStatus, ReturnStatus, IsLose, Fine)
-VALUES
-('CT001', 'PM001', 'S001', N'Đã mượn', N'Đã trả', 0, 0),
-('CT002', 'PM002', 'S003', N'Đã mượn', N'Chưa trả', 0, 0),
-('CT003', 'PM003', 'S005', N'Đã mượn', N'Đã trả', 0, 0),
-('CT004', 'PM004', 'S004', N'Đã mượn', N'Chưa trả', 0, 0),
-('CT005', 'PM005', 'S002', N'Đã mượn', N'Đã trả', 0, 0),
-('CT006', 'PM006', 'S005', N'Đã mượn', N'Đã trả', 0, 0),
-('CT007', 'PM007', 'S001', N'Đã mượn', N'Chưa trả', 0, 0),
-('CT008', 'PM008', 'S002', N'Đã mượn', N'Chưa trả', 0, 0),
-('CT009', 'PM009', 'S003', N'Đã mượn', N'Đã trả', 0, 0),
-('CT010', 'PM010', 'S004', N'Đã mượn', N'Chưa trả', 0, 0);
-
--- =========================
--- BẢNG SÁCH - NHIỀU TÁC GIẢ
--- =========================
-INSERT INTO BookAuthor (BookId, AuthorId)
-VALUES
-('S001', 'TG001'),
-('S001', 'TG002'),
-('S002', 'TG003'),
-('S002', 'TG004'),
-('S003', 'TG003'),
-('S004', 'TG004'),
-('S004', 'TG005'),
-('S005', 'TG001'),
-('S005', 'TG006');
-
-PRINT N'Dữ liệu mượn trả và tác giả đã được thêm thành công!';
-GO
-
