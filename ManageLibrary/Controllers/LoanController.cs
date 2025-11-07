@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ManageLibrary.Models; // Dùng namespace model từ CSDL
@@ -297,6 +297,58 @@ namespace QLThuVien.Controllers
                     return View(loanForView);
                 }
             }
+        }
+
+        // POST: /Admin/Loan/Delete/{id}
+        [HttpPost("Delete/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return NotFound();
+
+            // Chỉ cho xóa phiếu "Đã trả"
+            var loan = await _context.LoanSlips
+                .Include(l => l.LoanDetails)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+
+            if (loan == null)
+            {
+                TempData["ErrorMessage"] = "Phiếu mượn không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (loan.Status != "Đã trả")
+            {
+                TempData["ErrorMessage"] = "Chỉ được xóa phiếu mượn đã trả.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // Xóa chi tiết trước
+                    if (loan.LoanDetails != null && loan.LoanDetails.Any())
+                    {
+                        _context.LoanDetails.RemoveRange(loan.LoanDetails);
+                    }
+
+                    // Xóa phiếu mượn
+                    _context.LoanSlips.Remove(loan);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessMessage"] = "Đã xóa phiếu mượn thành công.";
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["ErrorMessage"] = "Xóa phiếu mượn thất bại: " + ex.Message;
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
