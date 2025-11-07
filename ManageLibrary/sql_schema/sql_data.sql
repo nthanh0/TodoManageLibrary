@@ -147,6 +147,20 @@ VALUES
 ('S003', N'Thiết kế web với HTML, CSS', 2022, N'C1', 320, 90000, 'TL002', 'TG003', 'NXB003', 15),
 ('S004', N'Khoa học dữ liệu với Python', 2023, N'A3', 500, 150000, 'TL001', 'TG004', 'NXB001', 7),
 ('S005', N'Cơ sở dữ liệu SQL', 2019, N'B1', 380, 85000, 'TL003', 'TG001', 'NXB002', 12);
+-- READERS
+INSERT INTO Readers (ReaderId, FullName, DateOfBirth, NationalId, TypeOfReader, Email, Telephone, Address, Department)
+VALUES
+('DG001', N'Nguyễn Văn Hùng', '2000-05-10', '123456789', N'Sinh viên', 'hungnv@example.com', '0901234567', N'123 Nguyễn Trãi, Hà Nội', N'Công nghệ thông tin'),
+('DG002', N'Trần Thị Lan', '1999-08-22', '987654321', N'Sinh viên', 'lantr@example.com', '0912345678', N'45 Hai Bà Trưng, Hà Nội', N'Kinh tế'),
+('DG003', N'Lê Minh Tuấn', '1998-12-01', '192837465', N'Cựu sinh viên', 'tuanlm@example.com', '0934567890', N'67 Láng Hạ, Hà Nội', N'Quản trị kinh doanh'),
+('DG004', N'Phạm Hồng Nhung', '2001-03-18', '564738291', N'Sinh viên', 'nhungph@example.com', '0945678901', N'89 Cầu Giấy, Hà Nội', N'Sư phạm'),
+('DG005', N'Hoàng Văn Tài', '1997-11-05', '837465920', N'Giảng viên', 'taihv@example.com', '0956789012', N'12 Kim Mã, Hà Nội', N'Công nghệ thông tin'),
+('DG006', N'Vũ Thị Mai', '2000-02-14', '475839201', N'Sinh viên', 'maivt@example.com', '0967890123', N'34 Lê Lợi, TP.HCM', N'Ngôn ngữ Anh'),
+('DG007', N'Ngô Đức Duy', '1999-09-25', '829104756', N'Sinh viên', 'duynd@example.com', '0978901234', N'90 Nguyễn Huệ, Đà Nẵng', N'Kỹ thuật phần mềm'),
+('DG008', N'Đặng Thị Hòa', '1998-04-30', '910283746', N'Cựu sinh viên', 'hoadt@example.com', '0989012345', N'56 Phan Đình Phùng, Hải Phòng', N'Tài chính - Ngân hàng'),
+('DG009', N'Bùi Quốc Khánh', '2001-06-12', '384756920', N'Sinh viên', 'khanhbq@example.com', '0990123456', N'23 Tôn Đức Thắng, Cần Thơ', N'Luật học'),
+('DG010', N'Nguyễn Thị Yến', '2000-01-20', '564738920', N'Sinh viên', 'yentn@example.com', '0902345678', N'101 Phạm Văn Đồng, Hà Nội', N'Thiết kế đồ họa');
+
 
 PRINT N'Cơ sở dữ liệu đã khởi tạo và thêm dữ liệu mẫu thành công!';
 GO
