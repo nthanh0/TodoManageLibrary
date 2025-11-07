@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ManageLibrary.Models.Book>
+@model IEnumerable<ManageLibrary.Models.Book>
 
 @{
     ViewData["Title"] = "Quản lý sách";
@@ -63,7 +63,6 @@
                             <td>@b.Quantity</td>
                             <td class="text-center" style="width: 160px;">
                                 <a asp-action="Edit" asp-route-id="@b.BookId" class="btn btn-warning btn-sm">Sửa</a>
-                                <a asp-action="Delete" asp-route-id="@b.BookId" class="btn btn-danger btn-sm ms-1">Xóa</a>
                             </td>
                         </tr>
                     }
@@ -72,4 +71,3 @@
         </table>
     </div>
 </div>
-
