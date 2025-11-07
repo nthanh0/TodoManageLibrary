@@ -129,6 +129,20 @@ VALUES ('NV001', N'Admin Quản Trị', N'Quản lý');
 INSERT INTO Account (AccountId, Username, Password, EmployeeId)
 VALUES ('TK001', N'admin', N'123', 'NV001');
 
+-- =========================
+-- ACCOUNT CHO ĐỘC GIẢ (Username = tên không dấu + ddMM ngày sinh, mật khẩu mặc định '123')
+-- =========================
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK002', N'nguyenvanhung1005', N'123', 'DG001');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK003', N'tranthilan2208', N'123', 'DG002');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK004', N'leminhtuan0112', N'123', 'DG003');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK005', N'phamhongnhung1803', N'123', 'DG004');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK006', N'hoangvantai0511', N'123', 'DG005');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK007', N'vuthimai1402', N'123', 'DG006');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK008', N'ngoducduy2509', N'123', 'DG007');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK009', N'dangthihoa3004', N'123', 'DG008');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK010', N'buiquockhanh1206', N'123', 'DG009');
+INSERT INTO Account (AccountId, Username, Password, ReaderId) VALUES ('TK011', N'nguyenthiyen2001', N'123', 'DG010');
+
 -- CATEGORY
 INSERT INTO Category (CategoryId, Name)
 VALUES (N'TL001', N'Công nghệ thông tin'),
